@@ -567,7 +567,10 @@ fun LogbookScreen(onNavigateToLogin: () -> Unit = {}) {
         // Zalogowany przez Legitymację → od razu jego rejestr
         LogbookContentScreen(
             ownerUsername = loggedInUsername!!,
-            onLogout = {}
+            onLogout = {
+                clearLoggedInUser(context)
+                loggedInUsername = null
+            }
         )
     } else if (useLocal) {
         // Wybrał "Użyj lokalnie"
@@ -1197,6 +1200,14 @@ fun LoginScreen(onLoginSuccess: (com.example.wetpka.model.User) -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LegitymacjaScreen(user: com.example.wetpka.model.User, onLogout: () -> Unit) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val db = remember { com.example.wetpka.data.AppDatabase.getDatabase(context) }
+    val catches by db.catchDao().getCatchesByOwner(user.username).collectAsState(initial = emptyList())
+
+    val totalFish = catches.sumOf { it.pieces }
+    val heaviestCatch = catches.maxByOrNull { it.totalWeight }
+    val longestCatch = catches.maxByOrNull { it.length }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -1267,26 +1278,39 @@ fun LegitymacjaScreen(user: com.example.wetpka.model.User, onLogout: () -> Unit)
                 line2 = "Zezwolenie zwykłe: Ważne do czerwca 2026\nZezwolenie morskie: Ważne do czerwca 2026"
             )
 
-            InfoCard(
-                iconId = android.R.drawable.star_on,
-                title = "Statystyki Ogólne",
-                line1 = "Statystyki połowów",
-                line2 = "Liczba złowionych ryb (ogółem): 128\nW tym sezonie: 45"
-            )
+            if (catches.isEmpty()) {
+                InfoCard(
+                    iconId = android.R.drawable.star_on,
+                    title = "Statystyki Ogólne",
+                    line1 = "",
+                    line2 = "Dodaj połowy do rejestru aby zobaczyć statystyki"
+                )
+            } else {
+                InfoCard(
+                    iconId = android.R.drawable.star_on,
+                    title = "Statystyki Ogólne",
+                    line1 = "Statystyki połowów",
+                    line2 = "Liczba złowionych ryb (ogółem): $totalFish\nLiczba wpisów w rejestrze: ${catches.size}"
+                )
 
-            InfoCard(
-                iconId = android.R.drawable.ic_menu_sort_by_size,
-                title = "Rekord Wagowy",
-                line1 = "Najcięższa ryba",
-                line2 = "Szczupak Pospolity: 8.2 kg\nZłowiono: 12.05.2023, Jezioro Śniardwy"
-            )
+                if (heaviestCatch != null) {
+                    InfoCard(
+                        iconId = android.R.drawable.ic_menu_sort_by_size,
+                        title = "Rekord Wagowy",
+                        line1 = "Najcięższa ryba",
+                        line2 = "${heaviestCatch.fishSpecies}: ${heaviestCatch.totalWeight} kg\nZłowiono: ${heaviestCatch.date}, łowisko ${heaviestCatch.spotNumber}"
+                    )
+                }
 
-            InfoCard(
-                iconId = android.R.drawable.ic_menu_edit,
-                title = "Rekord Długości",
-                line1 = "Najdłuższa ryba",
-                line2 = "Karp Pospolity: 95 cm\nZłowiono: 20.08.2023, Rzeka Odra"
-            )
+                if (longestCatch != null) {
+                    InfoCard(
+                        iconId = android.R.drawable.ic_menu_edit,
+                        title = "Rekord Długości",
+                        line1 = "Najdłuższa ryba",
+                        line2 = "${longestCatch.fishSpecies}: ${longestCatch.length} cm\nZłowiono: ${longestCatch.date}, łowisko ${longestCatch.spotNumber}"
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
         }
