@@ -536,11 +536,133 @@ fun WaterBodyCard(waterBody: WaterBody, userLocation: android.location.Location?
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LogbookScreen() {
+fun LogbookScreen(onNavigateToLogin: () -> Unit = {}) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val db = remember { com.example.wetpka.data.AppDatabase.getDatabase(context) }
+
+    // Sprawdzamy czy użytkownik jest zalogowany w Legitymacji
+    var loggedInUsername by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
+    var useLocal by remember { mutableStateOf(false) }
+
+    // Sprawdzaj stan logowania przy każdym renderowaniu
+    LaunchedEffect(Unit) {
+        val savedId = getLoggedInUserId(context)
+        if (savedId != -1) {
+            val user = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                db.userDao().findById(savedId)
+            }
+            loggedInUsername = user?.username
+        } else {
+            loggedInUsername = null
+        }
+        isLoading = false
+    }
+
+    if (isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+    } else if (loggedInUsername != null) {
+        // Zalogowany przez Legitymację → od razu jego rejestr
+        LogbookContentScreen(
+            ownerUsername = loggedInUsername!!,
+            onLogout = {}
+        )
+    } else if (useLocal) {
+        // Wybrał "Użyj lokalnie"
+        LogbookContentScreen(
+            ownerUsername = "localuser",
+            onLogout = { useLocal = false }
+        )
+    } else {
+        // Niezalogowany — ekran wyboru
+        LogbookChoiceScreen(
+            onChooseLocal = { useLocal = true },
+            onChooseLogin = onNavigateToLogin
+        )
+    }
+}
+
+// --- Ekran wyboru ---
+@Composable
+fun LogbookChoiceScreen(onChooseLocal: () -> Unit, onChooseLogin: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFE2EAF1)),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.size(56.dp),
+                    tint = Color(0xFF1E5370)
+                )
+                Text(
+                    text = "Rejestr połowów",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Zaloguj się, aby synchronizować rejestr z kontem, lub kontynuuj lokalnie.",
+                    fontSize = 14.sp,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Button(
+                    onClick = onChooseLogin,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    shape = RoundedCornerShape(25.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E5370))
+                ) {
+                    Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Zaloguj się", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+
+                OutlinedButton(
+                    onClick = onChooseLocal,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    shape = RoundedCornerShape(25.dp)
+                ) {
+                    Text("Użyj lokalnie", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E5370))
+                }
+            }
+        }
+    }
+}
+
+// --- Właściwy ekran rejestru połowów ---
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LogbookContentScreen(ownerUsername: String, onLogout: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val db = remember { com.example.wetpka.data.AppDatabase.getDatabase(context) }
     val catchDao = db.catchDao()
-    val catches by catchDao.getAllCatches().collectAsState(initial = emptyList())
+    val catches by catchDao.getCatchesByOwner(ownerUsername).collectAsState(initial = emptyList())
 
     val sortedCatches = catches.sortedByDescending { record ->
         try {
@@ -559,18 +681,36 @@ fun LogbookScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Rejestr połowów", fontWeight = FontWeight.Bold) },
+                title = {
+                    Column {
+                        Text("Rejestr połowów", fontWeight = FontWeight.Bold)
+                        Text(
+                            text = if (ownerUsername == "localuser") "Tryb lokalny" else "Zalogowano: $ownerUsername",
+                            fontSize = 11.sp,
+                            color = Color.Gray
+                        )
+                    }
+                },
                 actions = {
                     IconButton(onClick = {
                         recordToEdit = null
                         showAddDialog = true
                     }) {
                         Icon(
-                            imageVector = androidx.compose.material.icons.Icons.Default.Add,
+                            imageVector = Icons.Default.Add,
                             contentDescription = "Dodaj połów",
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(28.dp)
                         )
+                    }
+                    if (ownerUsername != "localuser") {
+                        IconButton(onClick = onLogout) {
+                            Icon(
+                                imageVector = Icons.Default.ExitToApp,
+                                contentDescription = "Wyloguj",
+                                tint = Color.Red
+                            )
+                        }
                     }
                 }
             )
@@ -795,6 +935,7 @@ fun LogbookScreen() {
 
                     val newRecord = com.example.wetpka.data.CatchRecord(
                         id = currentRecordId,
+                        ownerUsername = ownerUsername,
                         date = date, time = time, spotNumber = finalSpot, fishSpecies = species,
                         pieces = p, totalWeight = roundedWeight, length = roundedLength
                     )
@@ -1180,3 +1321,4 @@ fun InfoCard(iconId: Int, title: String, line1: String, line2: String) {
         }
     }
 }
+

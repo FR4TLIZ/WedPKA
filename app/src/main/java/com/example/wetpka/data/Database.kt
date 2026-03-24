@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 @Entity(tableName = "catches")
 data class CatchRecord(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val ownerUsername: String = "localuser",
     val date: String,
     val time: String,
     val spotNumber: String,
@@ -26,8 +27,8 @@ data class CatchRecord(
 // 2. Narzędzie do operowania na bazie (DAO)
 @Dao
 interface CatchDao {
-    @Query("SELECT * FROM catches ORDER BY id ASC")
-    fun getAllCatches(): Flow<List<CatchRecord>>
+    @Query("SELECT * FROM catches WHERE ownerUsername = :owner ORDER BY id ASC")
+    fun getCatchesByOwner(owner: String): Flow<List<CatchRecord>>
 
     @Insert
     suspend fun insertCatch(catchRecord: CatchRecord): Long
@@ -46,7 +47,7 @@ private fun hashPassword(password: String): String {
 }
 
 // 3. Główna klasa Bazy Danych
-@Database(entities = [CatchRecord::class, User::class], version = 2, exportSchema = false)
+@Database(entities = [CatchRecord::class, User::class], version = 5, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun catchDao(): CatchDao
     abstract fun userDao(): UserDao
@@ -62,8 +63,8 @@ abstract class AppDatabase : RoomDatabase() {
                 )
                     .fallbackToDestructiveMigration()
                     .addCallback(object : RoomDatabase.Callback() {
-                        override fun onCreate(db: SupportSQLiteDatabase) {
-                            super.onCreate(db)
+                        override fun onOpen(db: SupportSQLiteDatabase) {
+                            super.onOpen(db)
                             INSTANCE?.let { database ->
                                 CoroutineScope(Dispatchers.IO).launch {
                                     val dao = database.userDao()
@@ -101,6 +102,11 @@ abstract class AppDatabase : RoomDatabase() {
                     })
                     .build()
                 INSTANCE = instance
+                // Wymuszenie otwarcia bazy, żeby callback onOpen się odpalił
+                // po ustawieniu INSTANCE
+                CoroutineScope(Dispatchers.IO).launch {
+                    instance.userDao().getUserCount()
+                }
                 instance
             }
         }

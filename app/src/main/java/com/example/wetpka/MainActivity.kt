@@ -107,7 +107,17 @@ fun MainAppScreen() {
                 })
             }
             composable(BottomNavItem.Map.route) { MapScreen() }
-            composable(BottomNavItem.Logbook.route) { LogbookScreen() }
+            composable(BottomNavItem.Logbook.route) {
+                LogbookScreen(
+                    onNavigateToLogin = {
+                        navController.navigate(BottomNavItem.Profile.route) {
+                            popUpTo(navController.graph.startDestinationId) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+            }
             composable(BottomNavItem.Profile.route) { ProfileScreen() }
 
             composable(
