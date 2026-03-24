@@ -1038,14 +1038,13 @@ fun LegitymacjaScreen(user: com.example.wetpka.model.User, onLogout: () -> Unit)
         topBar = {
             TopAppBar(
                 title = { Text("Legitymacja Wędkarska", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onLogout) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Wyloguj")
-                    }
-                },
                 actions = {
-                    IconButton(onClick = { /* Opcjonalne pole */ }) {
-                        Icon(painter = painterResource(id = android.R.drawable.ic_menu_sort_by_size), contentDescription = "Waga")
+                    IconButton(onClick = onLogout) {
+                        Icon(
+                            imageVector = Icons.Default.ExitToApp,
+                            contentDescription = "Wyloguj",
+                            tint = Color.Red
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFE2EAF1))
