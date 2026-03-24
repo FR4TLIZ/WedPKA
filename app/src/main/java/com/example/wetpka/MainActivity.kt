@@ -32,9 +32,8 @@ import com.example.wetpka.ui.FishDetailScreen
 import com.example.wetpka.ui.LogbookScreen
 import com.example.wetpka.ui.MapScreen
 import com.example.wetpka.ui.ProfileScreen
-import com.example.wetpka.ui.theme.WetpkaTheme // Jeśli podkreśla na czerwono, sprawdź czy nazwa motywu się zgadza
+import com.example.wetpka.ui.theme.WetpkaTheme
 
-// Klasa pomocnicza definiująca nasze ekrany w menu dolnym
 sealed class BottomNavItem(val route: String, val title: String, val icon: ImageVector) {
     object Atlas : BottomNavItem("atlas", "Atlas", Icons.AutoMirrored.Filled.List)
     object Map : BottomNavItem("map", "Mapa łowisk", Icons.Default.Place)
@@ -89,7 +88,6 @@ fun MainAppScreen() {
                             selected = currentRoute == item.route,
                             onClick = {
                                 navController.navigate(item.route) {
-                                    // Gwarantuje, że nie otworzymy 100 takich samych ekranów po szybkim klikaniu
                                     popUpTo(navController.graph.startDestinationId) { saveState = true }
                                     launchSingleTop = true
                                     restoreState = true

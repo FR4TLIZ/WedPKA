@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 
-// 1. Tabela w bazie danych
 @Entity(tableName = "catches")
 data class CatchRecord(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
@@ -24,7 +23,6 @@ data class CatchRecord(
     val length: Double
 )
 
-// 2. Narzędzie do operowania na bazie (DAO)
 @Dao
 interface CatchDao {
     @Query("SELECT * FROM catches WHERE ownerUsername = :owner ORDER BY id ASC")
@@ -40,13 +38,11 @@ interface CatchDao {
     suspend fun deleteCatch(catchRecord: CatchRecord): Int
 }
 
-// Pomocnicza funkcja hashowania haseł
 private fun hashPassword(password: String): String {
     val bytes = java.security.MessageDigest.getInstance("SHA-256").digest(password.toByteArray())
     return bytes.joinToString("") { "%02x".format(it) }
 }
 
-// 3. Główna klasa Bazy Danych
 @Database(entities = [CatchRecord::class, User::class], version = 6, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun catchDao(): CatchDao
@@ -108,8 +104,6 @@ abstract class AppDatabase : RoomDatabase() {
                     })
                     .build()
                 INSTANCE = instance
-                // Wymuszenie otwarcia bazy, żeby callback onOpen się odpalił
-                // po ustawieniu INSTANCE
                 CoroutineScope(Dispatchers.IO).launch {
                     instance.userDao().getUserCount()
                 }

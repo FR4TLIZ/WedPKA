@@ -52,19 +52,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-// To są nazwy naszych filtrów (pigułek u góry)
 val filterOptions = listOf("Wszystkie", "Drapieżne", "Spokojnego żeru")
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun AtlasScreen(onFishClick: (Int) -> Unit = {}) {
-    // Stan: Przechowuje informację, która pigułka filtru jest aktualnie zaznaczona
     var selectedFilter by remember { mutableStateOf("Wszystkie") }
 
-    // Stan: Przechowuje tekst wpisany w wyszukiwarkę (na razie nieaktywny, jak na makiecie)
     var searchQuery by remember { mutableStateOf("") }
 
-    // Logika filtrowania: łączymy filtr kategorii i wyszukiwanie tekstowe
     val filteredFishes = remember(selectedFilter, searchQuery) {
         MockData.fishes.filter { fish ->
             val matchesFilter = selectedFilter == "Wszystkie" || fish.category == selectedFilter
@@ -80,13 +76,11 @@ fun AtlasScreen(onFishClick: (Int) -> Unit = {}) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            // Pasek górny z napisem "Atlas Ryb"
             TopAppBar(title = { Text("Atlas ryb", fontWeight = FontWeight.Bold) })
         }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
 
-            // 1. Wyszukiwarka (SearchBar) - Placeholder jak na makiecie
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
@@ -95,11 +89,10 @@ fun AtlasScreen(onFishClick: (Int) -> Unit = {}) {
                     .padding(horizontal = 16.dp),
                 placeholder = { Text("Wyszukaj gatunek ryby...") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Ikona wyszukiwania") },
-                shape = MaterialTheme.shapes.extraLarge, // Zaokrąglone rogi jak na makiecie
+                shape = MaterialTheme.shapes.extraLarge,
                 singleLine = true
             )
 
-            // 2. Filtrowanie (Pigułki/Chipsy) - Wiersz z opcjami filtrowania
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -115,69 +108,62 @@ fun AtlasScreen(onFishClick: (Int) -> Unit = {}) {
                 }
             }
 
-            // 3. Siatka (Grid) z rybami - Wypełnia resztę ekranu
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2), // 2 kolumny jak na makiecie
+                columns = GridCells.Fixed(2),
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Wyświetlamy tylko pofiltrowane ryby
                 items(filteredFishes) { fish ->
-                    FishGridItem(fish = fish, onClick = { onFishClick(fish.id) }) // To jest nasz pojedynczy kafelek ryby
+                    FishGridItem(fish = fish, onClick = { onFishClick(fish.id) })
                 }
             }
         }
     }
 }
 
-// Składnik UI dla pojedynczego kafelka w siatce (Zdjęcie + Nazwa + Nazwa łacińska)
 @Composable
 fun FishGridItem(fish: Fish, onClick: () -> Unit = {}) {
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1f) // Kafelki będą kwadratowe
+            .aspectRatio(1f)
             .clickable(onClick = onClick),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
 
-            // Zdjęcie Ryby
             Image(
                 painter = painterResource(id = fish.imageResId),
                 contentDescription = "Zdjęcie: ${fish.name}",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp) // Zdjęcie zajmuje górną część kafelka
-                    .padding(4.dp), // Delikatny margines wewnątrz karty
-                contentScale = ContentScale.Fit // Przytnij zdjęcie, żeby ładnie wypełniało przestrzeń
+                    .height(100.dp)
+                    .padding(4.dp),
+                contentScale = ContentScale.Fit
             )
 
-            // Tekst na dole kafelka
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 8.dp, vertical = 4.dp),
                 verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally // Centrujemy napisy jak na makiecie
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Nazwa Polska
                 Text(
                     text = fish.name,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
-                    maxLines = 1 // Jeśli nazwa jest za długa, utnij ją, nie przenoś
+                    maxLines = 1
                 )
 
-                // Nazwa Łacińska
                 Text(
                     text = fish.latinName,
                     fontWeight = FontWeight.Light,
                     fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.secondary, // Używamy koloru pomocniczego dla łaciny
-                    maxLines = 1 // Jeśli nazwa jest za długa, utnij ją, nie przenoś
+                    color = MaterialTheme.colorScheme.secondary,
+                    maxLines = 1
                 )
             }
         }
@@ -215,7 +201,6 @@ fun FishDetailScreen(fishId: Int, onBackClick: () -> Unit) {
                 .verticalScroll(rememberScrollState())
         ) {
 
-            // Zdjęcie ryby na pełną szerokość
             Image(
                 painter = painterResource(id = fish.imageResId),
                 contentDescription = "Zdjęcie: ${fish.name}",
@@ -227,7 +212,6 @@ fun FishDetailScreen(fishId: Int, onBackClick: () -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Karta z nazwami
             ElevatedCard(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -262,7 +246,6 @@ fun FishDetailScreen(fishId: Int, onBackClick: () -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Karta "Regulacje Wędkarskie"
             ElevatedCard(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -312,7 +295,6 @@ fun FishDetailScreen(fishId: Int, onBackClick: () -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Karta "Informacje i Siedlisko"
             ElevatedCard(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -407,7 +389,6 @@ fun MapScreen() {
         }
     }
 
-    // Pomocnicza funkcja do pobierania lokalizacji z fallbackiem
     fun fetchLocation() {
         val fusedLocationClient = com.google.android.gms.location.LocationServices.getFusedLocationProviderClient(context)
         try {
@@ -415,7 +396,6 @@ fun MapScreen() {
                 if (location != null) {
                     userLocation = location
                 } else {
-                    // lastLocation może być null – żądamy aktualnej lokalizacji
                     val cts = com.google.android.gms.tasks.CancellationTokenSource()
                     fusedLocationClient.getCurrentLocation(
                         com.google.android.gms.location.Priority.PRIORITY_BALANCED_POWER_ACCURACY,
@@ -428,7 +408,6 @@ fun MapScreen() {
         } catch (e: SecurityException) { e.printStackTrace() }
     }
 
-    // Rejestrator pozwolenia na lokalizację
     val locationPermissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
         contract = androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -438,7 +417,6 @@ fun MapScreen() {
         }
     }
 
-    // Prosimy o uprawnienia przy starcie ekranu
     LaunchedEffect(Unit) {
         val permission = android.Manifest.permission.ACCESS_FINE_LOCATION
         val isGranted = androidx.core.content.ContextCompat.checkSelfPermission(
@@ -461,7 +439,6 @@ fun MapScreen() {
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
 
-            // Pasek wyszukiwania
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
@@ -474,7 +451,6 @@ fun MapScreen() {
                 singleLine = true
             )
 
-            // Lista łowisk
             androidx.compose.foundation.lazy.LazyColumn(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -489,7 +465,6 @@ fun MapScreen() {
 
 @Composable
 fun WaterBodyCard(waterBody: WaterBody, userLocation: android.location.Location?, permissionGranted: Boolean) {
-    // Liczenie odległości
     var distanceText = "Lokalizacja niedostępna"
     if (permissionGranted && userLocation != null) {
         val targetLocation = android.location.Location("").apply {
@@ -507,7 +482,6 @@ fun WaterBodyCard(waterBody: WaterBody, userLocation: android.location.Location?
     ) {
         Row(modifier = Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
 
-            // Obrazek (Miniatura)
             Image(
                 painter = painterResource(id = waterBody.imageResId),
                 contentDescription = waterBody.name,
@@ -517,7 +491,6 @@ fun WaterBodyCard(waterBody: WaterBody, userLocation: android.location.Location?
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            // Teksty
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = waterBody.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Text(text = waterBody.region, fontSize = 14.sp)
@@ -525,7 +498,6 @@ fun WaterBodyCard(waterBody: WaterBody, userLocation: android.location.Location?
                 Text(text = waterBody.district, fontSize = 12.sp, color = MaterialTheme.colorScheme.secondary)
             }
 
-            // Odległość na samym dole po prawej
             Column(horizontalAlignment = Alignment.End) {
                 Spacer(modifier = Modifier.height(40.dp))
                 Text(text = distanceText, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
@@ -540,12 +512,10 @@ fun LogbookScreen(onNavigateToLogin: () -> Unit = {}) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val db = remember { com.example.wetpka.data.AppDatabase.getDatabase(context) }
 
-    // Sprawdzamy czy użytkownik jest zalogowany w Legitymacji
     var loggedInUsername by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var useLocal by remember { mutableStateOf(false) }
 
-    // Sprawdzaj stan logowania przy każdym renderowaniu
     LaunchedEffect(Unit) {
         val savedId = getLoggedInUserId(context)
         if (savedId != -1) {
@@ -564,7 +534,6 @@ fun LogbookScreen(onNavigateToLogin: () -> Unit = {}) {
             CircularProgressIndicator()
         }
     } else if (loggedInUsername != null) {
-        // Zalogowany przez Legitymację → od razu jego rejestr
         LogbookContentScreen(
             ownerUsername = loggedInUsername!!,
             onLogout = {
@@ -573,13 +542,11 @@ fun LogbookScreen(onNavigateToLogin: () -> Unit = {}) {
             }
         )
     } else if (useLocal) {
-        // Wybrał "Użyj lokalnie"
         LogbookContentScreen(
             ownerUsername = "localuser",
             onLogout = { useLocal = false }
         )
     } else {
-        // Niezalogowany — ekran wyboru
         LogbookChoiceScreen(
             onChooseLocal = { useLocal = true },
             onChooseLogin = onNavigateToLogin
@@ -587,7 +554,6 @@ fun LogbookScreen(onNavigateToLogin: () -> Unit = {}) {
     }
 }
 
-// --- Ekran wyboru ---
 @Composable
 fun LogbookChoiceScreen(onChooseLocal: () -> Unit, onChooseLogin: () -> Unit) {
     Box(
@@ -658,7 +624,6 @@ fun LogbookChoiceScreen(onChooseLocal: () -> Unit, onChooseLogin: () -> Unit) {
     }
 }
 
-// --- Właściwy ekran rejestru połowów ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogbookContentScreen(ownerUsername: String, onLogout: () -> Unit) {
@@ -822,7 +787,6 @@ fun LogbookContentScreen(ownerUsername: String, onLogout: () -> Unit) {
 
         val calendar = java.util.Calendar.getInstance()
 
-        // 1. Zabezpieczenie Kalendarza (maxDate ustawione na teraz)
         val datePickerDialog = android.app.DatePickerDialog(
             context,
             { _, year, month, dayOfMonth ->
@@ -918,7 +882,6 @@ fun LogbookContentScreen(ownerUsername: String, onLogout: () -> Unit) {
                     if (w == null || w < 0.01 || w > 999.0) { errorMessage = "Waga musi być liczbą z przedziału 0.01 - 999 kg."; return@Button }
                     if (l == null || l < 1.0 || l > 999.0) { errorMessage = "Długość musi być liczbą z przedziału 1 - 999 cm."; return@Button }
 
-                    // 2. Walidacja Czasu z przyszłości
                     val selectedDateTime = try {
                         java.text.SimpleDateFormat("dd.MM.yyyy HH:mm", java.util.Locale.getDefault()).parse("$date $time")
                     } catch (e: Exception) { null }
@@ -986,9 +949,6 @@ fun LogbookContentScreen(ownerUsername: String, onLogout: () -> Unit) {
     }
 }
 
-// ===================== EKRAN LEGITYMACJA (z logowaniem) =====================
-
-// Pomocnicza funkcja do zapisu/odczytu zalogowanego użytkownika
 private fun saveLoggedInUserId(context: android.content.Context, userId: Int) {
     context.getSharedPreferences("auth", android.content.Context.MODE_PRIVATE)
         .edit().putInt("logged_in_user_id", userId).apply()
@@ -1004,7 +964,6 @@ private fun clearLoggedInUser(context: android.content.Context) {
         .edit().remove("logged_in_user_id").apply()
 }
 
-// Lokalna funkcja hashowania (omija problem z importami od Copilota)
 private fun localHashPassword(password: String): String {
     val bytes = java.security.MessageDigest.getInstance("SHA-256").digest(password.toByteArray())
     return bytes.joinToString("") { "%02x".format(it) }
@@ -1015,7 +974,6 @@ fun ProfileScreen() {
     val context = androidx.compose.ui.platform.LocalContext.current
     val db = remember { com.example.wetpka.data.AppDatabase.getDatabase(context) }
 
-    // Wymuszona pełna ścieżka do modelu User
     var loggedInUser by remember { mutableStateOf<com.example.wetpka.model.User?>(null) }
     var isLoading by remember { mutableStateOf(true) }
 
@@ -1196,7 +1154,6 @@ fun LoginScreen(onLoginSuccess: (com.example.wetpka.model.User) -> Unit) {
     }
 }
 
-// Pomocnicza: parsuje "MM.yyyy" i sprawdza czy data jest w przyszłości (lub bieżący miesiąc)
 private fun isDateValid(mmYyyy: String): Boolean {
     if (mmYyyy.isBlank()) return false
     return try {
@@ -1210,7 +1167,6 @@ private fun isDateValid(mmYyyy: String): Boolean {
     } catch (e: Exception) { false }
 }
 
-// Pomocnicza: "MM.yyyy" → "czerwiec 2026" itd.
 private fun formatMonthYear(mmYyyy: String): String {
     if (mmYyyy.isBlank()) return ""
     return try {
@@ -1236,12 +1192,10 @@ fun LegitymacjaScreen(user: com.example.wetpka.model.User, onLogout: () -> Unit)
     val heaviestCatch = catches.maxByOrNull { it.totalWeight }
     val longestCatch = catches.maxByOrNull { it.length }
 
-    // Ważność składki
     val membershipValid = isDateValid(user.membershipPaidTo)
     val membershipText = if (user.membershipPaidTo.isBlank()) "Brak informacji"
         else formatMonthYear(user.membershipPaidTo)
 
-    // Ważność zezwoleń
     val permitValid = if (user.permitValidTo.isBlank()) null else isDateValid(user.permitValidTo)
     val seaPermitValid = if (user.seaPermitValidTo.isBlank()) null else isDateValid(user.seaPermitValidTo)
 
@@ -1272,7 +1226,6 @@ fun LegitymacjaScreen(user: com.example.wetpka.model.User, onLogout: () -> Unit)
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
-            // Karta z danymi użytkownika
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -1302,7 +1255,6 @@ fun LegitymacjaScreen(user: com.example.wetpka.model.User, onLogout: () -> Unit)
                 }
             }
 
-            // Opłacenie składek
             PermitCard(
                 iconId = android.R.drawable.ic_menu_myplaces,
                 title = "Opłacenie składek",
@@ -1311,7 +1263,6 @@ fun LegitymacjaScreen(user: com.example.wetpka.model.User, onLogout: () -> Unit)
                 isValid = membershipValid
             )
 
-            // Ważność Zezwolenia
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -1334,7 +1285,6 @@ fun LegitymacjaScreen(user: com.example.wetpka.model.User, onLogout: () -> Unit)
                     }
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Zezwolenie zwykłe
                     Row {
                         Text("Zezwolenie zwykłe: ", fontSize = 13.sp, color = Color.DarkGray)
                         if (permitValid == null) {
@@ -1346,7 +1296,6 @@ fun LegitymacjaScreen(user: com.example.wetpka.model.User, onLogout: () -> Unit)
                         }
                     }
 
-                    // Zezwolenie morskie
                     Row {
                         Text("Zezwolenie morskie: ", fontSize = 13.sp, color = Color.DarkGray)
                         if (seaPermitValid == null) {
@@ -1360,7 +1309,6 @@ fun LegitymacjaScreen(user: com.example.wetpka.model.User, onLogout: () -> Unit)
                 }
             }
 
-            // Statystyki
             if (catches.isEmpty()) {
                 InfoCard(
                     iconId = android.R.drawable.star_on,

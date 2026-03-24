@@ -5,8 +5,6 @@ import com.example.wetpka.model.Fish
 import com.example.wetpka.model.WaterBody
 
 object MockData {
-    // Tymczasowo używamy domyślnej ikony Androida jako obrazka ryby (R.drawable.ic_launcher_foreground)
-    // Kiedy wrzucisz zdjęcia, po prostu zmienisz to np. na R.drawable.szczupak
     val fishes = listOf(
         Fish(
             id = 1,
