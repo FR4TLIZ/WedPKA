@@ -33,7 +33,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -914,6 +919,19 @@ fun LoginScreen(onLoginSuccess: (com.example.wetpka.model.User) -> Unit) {
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var passwordVisible by remember { mutableStateOf(false) }
 
+    val doLogin: () -> Unit = {
+        coroutineScope.launch {
+            val user: com.example.wetpka.model.User? = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                db.userDao().findByUsername(username.trim())
+            }
+            if (user != null && user.passwordHash == localHashPassword(password)) {
+                onLoginSuccess(user)
+            } else {
+                errorMessage = "Nieprawidłowe dane logowania."
+            }
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -961,7 +979,14 @@ fun LoginScreen(onLoginSuccess: (com.example.wetpka.model.User) -> Unit) {
                     label = { Text("Adres e-mail lub Nr Karty PZW") },
                     leadingIcon = { Icon(painterResource(id = android.R.drawable.ic_dialog_email), contentDescription = null) },
                     modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
                     shape = RoundedCornerShape(8.dp),
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.None,
+                        autoCorrectEnabled = false,
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    ),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color(0xFF1E5370),
                         unfocusedBorderColor = Color.Gray
@@ -983,7 +1008,17 @@ fun LoginScreen(onLoginSuccess: (com.example.wetpka.model.User) -> Unit) {
                     },
                     visualTransformation = if (passwordVisible) androidx.compose.ui.text.input.VisualTransformation.None else PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
                     shape = RoundedCornerShape(8.dp),
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.None,
+                        autoCorrectEnabled = false,
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = { doLogin() }
+                    ),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color(0xFF1E5370),
                         unfocusedBorderColor = Color.Gray
@@ -1004,20 +1039,7 @@ fun LoginScreen(onLoginSuccess: (com.example.wetpka.model.User) -> Unit) {
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Button(
-                    onClick = {
-                        coroutineScope.launch {
-                            // Pełna ścieżka do modelu User rozwiązuje problem type mismatch!
-                            val user: com.example.wetpka.model.User? = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                                db.userDao().findByUsername(username.trim())
-                            }
-
-                            if (user != null && user.passwordHash == localHashPassword(password)) {
-                                onLoginSuccess(user)
-                            } else {
-                                errorMessage = "Nieprawidłowe dane logowania."
-                            }
-                        }
-                    },
+                    onClick = { doLogin() },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
