@@ -37,12 +37,16 @@ fun AtlasScreen(onFishClick: (Int) -> Unit = {}) {
     // Stan: Przechowuje tekst wpisany w wyszukiwarkę (na razie nieaktywny, jak na makiecie)
     var searchQuery by remember { mutableStateOf("") }
 
-    // Logika filtrowania: Ta zmienna przechowuje tylko ryby pasujące do wybranej pigułki
-    val filteredFishes = remember(selectedFilter) {
-        if (selectedFilter == "Wszystkie") {
-            MockData.fishes
-        } else {
-            MockData.fishes.filter { it.category == selectedFilter }
+    // Logika filtrowania: łączymy filtr kategorii i wyszukiwanie tekstowe
+    val filteredFishes = remember(selectedFilter, searchQuery) {
+        MockData.fishes.filter { fish ->
+            val matchesFilter = selectedFilter == "Wszystkie" || fish.category == selectedFilter
+            val matchesQuery = searchQuery.isBlank() ||
+                fish.name.contains(searchQuery, ignoreCase = true) ||
+                fish.latinName.contains(searchQuery, ignoreCase = true) ||
+                fish.englishName.contains(searchQuery, ignoreCase = true)
+
+            matchesFilter && matchesQuery
         }
     }
 
@@ -121,7 +125,7 @@ fun FishGridItem(fish: Fish, onClick: () -> Unit = {}) {
                     .fillMaxWidth()
                     .height(100.dp) // Zdjęcie zajmuje górną część kafelka
                     .padding(4.dp), // Delikatny margines wewnątrz karty
-                contentScale = ContentScale.Crop // Przytnij zdjęcie, żeby ładnie wypełniało przestrzeń
+                contentScale = ContentScale.Fit // Przytnij zdjęcie, żeby ładnie wypełniało przestrzeń
             )
 
             // Tekst na dole kafelka
@@ -191,7 +195,7 @@ fun FishDetailScreen(fishId: Int, onBackClick: () -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(220.dp),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Fit
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -366,9 +370,9 @@ fun MapScreen() {
 
     val filteredWaterBodies = remember(searchQuery) {
         if (searchQuery.isBlank()) {
-            com.example.wetpka.data.MockData.waterBodies
+            MockData.waterBodies
         } else {
-            com.example.wetpka.data.MockData.waterBodies.filter {
+            MockData.waterBodies.filter {
                 it.name.contains(searchQuery, ignoreCase = true) ||
                 it.region.contains(searchQuery, ignoreCase = true) ||
                 it.district.contains(searchQuery, ignoreCase = true)
@@ -457,7 +461,7 @@ fun MapScreen() {
 }
 
 @Composable
-fun WaterBodyCard(waterBody: com.example.wetpka.model.WaterBody, userLocation: android.location.Location?, permissionGranted: Boolean) {
+fun WaterBodyCard(waterBody: WaterBody, userLocation: android.location.Location?, permissionGranted: Boolean) {
     // Liczenie odległości
     var distanceText = "Lokalizacja niedostępna"
     if (permissionGranted && userLocation != null) {
