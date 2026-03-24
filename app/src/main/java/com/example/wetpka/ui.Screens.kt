@@ -81,7 +81,7 @@ fun AtlasScreen(onFishClick: (Int) -> Unit = {}) {
         modifier = Modifier.fillMaxSize(),
         topBar = {
             // Pasek górny z napisem "Atlas Ryb"
-            TopAppBar(title = { Text("Atlas Ryb", fontWeight = FontWeight.Bold) })
+            TopAppBar(title = { Text("Atlas ryb", fontWeight = FontWeight.Bold) })
         }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
@@ -1081,14 +1081,13 @@ fun LoginScreen(onLoginSuccess: (com.example.wetpka.model.User) -> Unit) {
             .fillMaxSize()
             .background(Color(0xFFE2EAF1))
     ) {
-        Icon(
-            painter = painterResource(id = android.R.drawable.ic_menu_crop),
+        Image(
+            painter = painterResource(id = com.example.wetpka.R.drawable.icon),
             contentDescription = "Logo",
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = 80.dp)
-                .size(64.dp),
-            tint = Color(0xFF1E5370)
+                .padding(top = 60.dp)
+                .size(100.dp)
         )
 
         Text(
@@ -1120,7 +1119,7 @@ fun LoginScreen(onLoginSuccess: (com.example.wetpka.model.User) -> Unit) {
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it; errorMessage = null },
-                    label = { Text("Adres e-mail lub Nr Karty PZW") },
+                    label = { Text("Nazwa użytkownika") },
                     leadingIcon = { Icon(painterResource(id = android.R.drawable.ic_dialog_email), contentDescription = null) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
@@ -1249,7 +1248,7 @@ fun LegitymacjaScreen(user: com.example.wetpka.model.User, onLogout: () -> Unit)
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Legitymacja Wędkarska", fontWeight = FontWeight.Bold) },
+                title = { Text("Legitymacja", fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = onLogout) {
                         Icon(
@@ -1296,7 +1295,7 @@ fun LegitymacjaScreen(user: com.example.wetpka.model.User, onLogout: () -> Unit)
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {
-                        Text("Imię: ${user.firstName} ${user.lastName}", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text("${user.firstName} ${user.lastName}", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                         Text("Przynależność: ${user.district}", fontSize = 14.sp)
                         Text("Nr Karty: ${user.cardNumber}", fontSize = 14.sp)
                     }
@@ -1307,7 +1306,7 @@ fun LegitymacjaScreen(user: com.example.wetpka.model.User, onLogout: () -> Unit)
             PermitCard(
                 iconId = android.R.drawable.ic_menu_myplaces,
                 title = "Opłacenie składek",
-                label = "Składka członkowska: Opłacona do",
+                label = "Składka członkowska: opłacona do",
                 dateText = membershipText,
                 isValid = membershipValid
             )
@@ -1331,7 +1330,7 @@ fun LegitymacjaScreen(user: com.example.wetpka.model.User, onLogout: () -> Unit)
                             tint = Color(0xFF1E5370)
                         )
                         Spacer(modifier = Modifier.width(16.dp))
-                        Text("Ważność Zezwolenia", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text("Ważność zezwolenia", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -1365,14 +1364,14 @@ fun LegitymacjaScreen(user: com.example.wetpka.model.User, onLogout: () -> Unit)
             if (catches.isEmpty()) {
                 InfoCard(
                     iconId = android.R.drawable.star_on,
-                    title = "Statystyki Ogólne",
+                    title = "Statystyki ogólne",
                     line1 = "",
                     line2 = "Dodaj połowy do rejestru aby zobaczyć statystyki"
                 )
             } else {
                 InfoCard(
                     iconId = android.R.drawable.star_on,
-                    title = "Statystyki Ogólne",
+                    title = "Statystyki ogólne",
                     line1 = "Statystyki połowów",
                     line2 = "Liczba złowionych ryb (ogółem): $totalFish\nLiczba wpisów w rejestrze: ${catches.size}"
                 )
@@ -1380,7 +1379,7 @@ fun LegitymacjaScreen(user: com.example.wetpka.model.User, onLogout: () -> Unit)
                 if (heaviestCatch != null) {
                     InfoCard(
                         iconId = android.R.drawable.ic_menu_sort_by_size,
-                        title = "Rekord Wagowy",
+                        title = "Rekord wagowy",
                         line1 = "Najcięższa ryba",
                         line2 = "${heaviestCatch.fishSpecies}: ${heaviestCatch.totalWeight} kg\nZłowiono: ${heaviestCatch.date}, łowisko ${heaviestCatch.spotNumber}"
                     )
@@ -1389,7 +1388,7 @@ fun LegitymacjaScreen(user: com.example.wetpka.model.User, onLogout: () -> Unit)
                 if (longestCatch != null) {
                     InfoCard(
                         iconId = android.R.drawable.ic_menu_edit,
-                        title = "Rekord Długości",
+                        title = "Rekord długości",
                         line1 = "Najdłuższa ryba",
                         line2 = "${longestCatch.fishSpecies}: ${longestCatch.length} cm\nZłowiono: ${longestCatch.date}, łowisko ${longestCatch.spotNumber}"
                     )

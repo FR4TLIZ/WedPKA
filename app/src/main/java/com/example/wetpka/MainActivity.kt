@@ -3,6 +3,8 @@ package com.example.wetpka
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -40,6 +42,15 @@ sealed class BottomNavItem(val route: String, val title: String, val icon: Image
     object Profile : BottomNavItem("profile", "Legitymacja", Icons.Default.Person)
 }
 
+private val tabOrder = mapOf(
+    "atlas" to 0,
+    "map" to 1,
+    "logbook" to 2,
+    "profile" to 3
+)
+
+private const val ANIM_DURATION = 300
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,10 +64,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainAppScreen() {
-    // Kontroler nawigacji
     val navController = rememberNavController()
 
-    // Lista naszych zakładek
     val items = listOf(
         BottomNavItem.Atlas,
         BottomNavItem.Map,
@@ -64,14 +73,11 @@ fun MainAppScreen() {
         BottomNavItem.Profile
     )
 
-    // Obserwujemy aktualną trasę poza bottomBar, żeby móc ją sprawdzić
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // Dolny pasek ukrywamy na ekranach szczegółów
     val showBottomBar = currentRoute?.startsWith("fish_detail") != true
 
-    // Główny szkielet z dolnym paskiem (Scaffold)
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
@@ -95,11 +101,34 @@ fun MainAppScreen() {
             }
         }
     ) { innerPadding ->
-        // To jest nasz "pojemnik" na ekrany, który reaguje na kliknięcia w menu dolnym
         NavHost(
             navController = navController,
             startDestination = BottomNavItem.Atlas.route,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
+            enterTransition = {
+                val fromIndex = tabOrder[initialState.destination.route] ?: 0
+                val toIndex = tabOrder[targetState.destination.route] ?: 0
+                if (toIndex >= fromIndex) {
+                    slideInHorizontally(animationSpec = tween(ANIM_DURATION)) { it } + fadeIn(tween(ANIM_DURATION))
+                } else {
+                    slideInHorizontally(animationSpec = tween(ANIM_DURATION)) { -it } + fadeIn(tween(ANIM_DURATION))
+                }
+            },
+            exitTransition = {
+                val fromIndex = tabOrder[initialState.destination.route] ?: 0
+                val toIndex = tabOrder[targetState.destination.route] ?: 0
+                if (toIndex >= fromIndex) {
+                    slideOutHorizontally(animationSpec = tween(ANIM_DURATION)) { -it } + fadeOut(tween(ANIM_DURATION))
+                } else {
+                    slideOutHorizontally(animationSpec = tween(ANIM_DURATION)) { it } + fadeOut(tween(ANIM_DURATION))
+                }
+            },
+            popEnterTransition = {
+                slideInHorizontally(animationSpec = tween(ANIM_DURATION)) { -it } + fadeIn(tween(ANIM_DURATION))
+            },
+            popExitTransition = {
+                slideOutHorizontally(animationSpec = tween(ANIM_DURATION)) { it } + fadeOut(tween(ANIM_DURATION))
+            }
         ) {
             composable(BottomNavItem.Atlas.route) {
                 AtlasScreen(onFishClick = { fishId ->
