@@ -2,6 +2,7 @@ package com.example.wetpka.data
 
 import com.example.wetpka.R
 import com.example.wetpka.model.Fish
+import com.example.wetpka.model.WaterBody
 
 object MockData {
     // Tymczasowo używamy domyślnej ikony Androida jako obrazka ryby (R.drawable.ic_launcher_foreground)
@@ -103,5 +104,17 @@ object MockData {
             badBites = "Skrajne upały",
             imageResId = R.drawable.ploc
         )
+    )
+    val waterBodies = listOf(
+        WaterBody(1, "Rzeka Odra - Odcinek Wrocławski", "Dolnośląskie", "Długość: 850 km", "Okręg: PZW Wrocław", 51.1079, 17.0385, R.drawable.odra),
+        WaterBody(2, "Zalew Mietkowski", "Dolnośląskie", "Wielkość: 9 km²", "Okręg: PZW Wrocław", 50.9667, 16.6167, R.drawable.mietkowski),
+        WaterBody(3, "Staw Pilczycki", "Wrocław", "Wielkość: 8 ha", "Okręg: PZW Wrocław", 51.1411, 16.9422, R.drawable.pilczyce),
+        WaterBody(4, "Jezioro Bajkał (Kamieniec)", "Dolnośląskie", "Wielkość: 60 ha", "Okręg: PZW Wrocław", 51.0768, 17.1824, R.drawable.bajkal),
+        WaterBody(5, "Rzeka Bystrzyca", "Dolnośląskie", "Długość: 95 km", "Okręg: PZW Wrocław", 51.1444, 16.9328, R.drawable.bystrzyca),
+        WaterBody(6, "Rzeka Oława", "Dolnośląskie", "Długość: 99 km", "Okręg: PZW Wrocław", 51.1033, 17.0549, R.drawable.olawa),
+        WaterBody(7, "Kąpielisko Kopalnia", "Paniowice", "Wielkość: 18 ha", "Łowisko Komercyjne", 51.1897, 16.9381, R.drawable.kopalnia),
+        WaterBody(8, "Staw Leśnicki", "Wrocław", "Wielkość: 3 ha", "Okręg: PZW Wrocław", 51.1481, 16.8617, R.drawable.lesnicki),
+        WaterBody(9, "Rzeka Widawa", "Dolnośląskie", "Długość: 109 km", "Okręg: PZW Wrocław", 51.1683, 17.0425, R.drawable.widawa),
+        WaterBody(10, "Zbiornik Sulistrowice", "Dolnośląskie", "Wielkość: 5 ha", "Okręg: PZW Wrocław", 50.8522, 16.6978, R.drawable.sulistrowice)
     )
 }
