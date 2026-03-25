@@ -2,6 +2,7 @@ package com.example.wetpka
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
@@ -53,6 +54,7 @@ private const val ANIM_DURATION = 300
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
             WetpkaTheme {
                 MainAppScreen()

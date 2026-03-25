@@ -77,7 +77,10 @@ fun AtlasScreen(onFishClick: (Int) -> Unit = {}) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(title = { Text("Atlas ryb", fontWeight = FontWeight.Bold) })
+            TopAppBar(
+                title = { Text("Atlas ryb", fontWeight = FontWeight.Bold) },
+                windowInsets = WindowInsets(0, 0, 0, 0)
+            )
         }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
@@ -185,6 +188,7 @@ fun FishDetailScreen(fishId: Int, onBackClick: () -> Unit) {
                         fontWeight = FontWeight.Bold
                     )
                 },
+                windowInsets = WindowInsets(0, 0, 0, 0),
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
@@ -434,7 +438,8 @@ fun MapScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Zbiorniki PZW", fontWeight = FontWeight.Bold) }
+                title = { Text("Zbiorniki PZW", fontWeight = FontWeight.Bold) },
+                windowInsets = WindowInsets(0, 0, 0, 0)
             )
         }
     ) { innerPadding ->
@@ -675,7 +680,8 @@ fun LogbookContentScreen(
                             )
                         }
                     }
-                }
+                },
+                windowInsets = WindowInsets(0, 0, 0, 0)
             )
         }
     ) { innerPadding ->
@@ -1159,6 +1165,7 @@ fun LegitymacjaScreen(user: com.example.wetpka.model.User, catches: List<CatchRe
                         )
                     }
                 },
+                windowInsets = WindowInsets(0, 0, 0, 0),
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFE2EAF1))
             )
         }
