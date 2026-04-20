@@ -1,4 +1,4 @@
-# WędPKA
+# WedPKA
 
 Aplikacja mobilna dla wędkarzy zrzeszonych w PZW (Polskim Związku Wędkarskim), stworzona z myślą o okręgu wrocławskim. Ułatwia prowadzenie rejestru połowów, przeglądanie atlasu ryb oraz wyszukiwanie łowisk w regionie.
 
